@@ -1257,15 +1257,10 @@ if (_chatSettingsEl) _chatSettingsEl.addEventListener('click', () => {
 
 const autoSendToggle = document.getElementById('auto-send-toggle');
 const autoSendControl = document.getElementById('auto-send-control');
-const autoSendSlider = document.getElementById('auto-send-slider');
-const autoSendValue = document.getElementById('auto-send-value');
 
 const updateAutoSendUI = () => {
     autoSendToggle.classList.toggle('active', !!settings.autoSendEnabled);
     autoSendControl.style.display = settings.autoSendEnabled ? "flex" : "none";
-    const currentVal = settings.autoSendInterval || 5;
-    autoSendSlider.value = currentVal;
-    autoSendValue.textContent = `${currentVal}分钟`;
 };
 
 updateAutoSendUI();
@@ -1276,20 +1271,6 @@ autoSendToggle.addEventListener('click', () => {
     manageAutoSendTimer(); 
     throttledSaveData();
     showNotification(`主动发送已${settings.autoSendEnabled ? '开启' : '关闭'}`, 'success');
-});
-
-autoSendSlider.value = settings.autoSendInterval || 5;
-autoSendValue.textContent = `${settings.autoSendInterval || 5}分钟`;
-
-autoSendSlider.addEventListener('input', (e) => {
-    const val = parseInt(e.target.value);
-    settings.autoSendInterval = val;
-    autoSendValue.textContent = `${val}分钟`;
-});
-
-autoSendSlider.addEventListener('change', () => {
-    manageAutoSendTimer(); 
-    throttledSaveData();
 });
 
             const resetBgBtn = document.getElementById('reset-default-bg');
