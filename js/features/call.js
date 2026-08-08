@@ -27,6 +27,7 @@
         connectingTimer: null,
         randomCallTimer: null,
         isPartnerCall:   false,
+        mode:            'video',   // 'video' | 'voice'
     };
 
     const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
@@ -281,6 +282,50 @@
 #call-window.immersive #call-immersive-btn{opacity:.35 !important;pointer-events:all !important;}
 #call-window.immersive #call-immersive-btn:hover{opacity:1 !important;}
 
+/* ---- mode: video（默认，摄像头氛围）---- */
+#call-window.video-mode .call-orb{opacity:1;}
+#call-window.video-mode .call-bg-grad{opacity:1;}
+
+/* ---- mode: voice（语音通话，纯色+大头像+强声波）---- */
+#call-window.voice-mode .call-orb{opacity:0;}
+#call-window.voice-mode .call-bg-grad{
+    opacity:1;
+    background:
+        radial-gradient(circle at 50% 30%, rgba(var(--accent-color-rgb,224,105,138),.18), transparent 60%),
+        linear-gradient(160deg, rgba(20,22,40,.95), rgba(8,10,20,.98));
+}
+#call-window.voice-mode .call-avatar,
+#call-window.voice-mode #call-conn-avatar{
+    width: 100px !important; height: 100px !important;
+    box-shadow: 0 0 40px rgba(var(--accent-color-rgb,224,105,138),.35), 0 0 80px rgba(var(--accent-color-rgb,224,105,138),.18);
+    border-color: rgba(255,255,255,.35);
+}
+#call-window.voice-mode .call-av-pulse{
+    animation-duration: 1.8s;
+    box-shadow: 0 0 0 0 rgba(var(--accent-color-rgb,224,105,138),.5);
+}
+#call-window.voice-mode .call-av-pulse2{
+    animation-duration: 2.4s;
+    animation-delay: .3s;
+}
+#call-window.voice-mode .call-wave{
+    height: 26px; gap: 4px; margin-top: 4px;
+}
+#call-window.voice-mode .call-wave span{
+    width: 4px; border-radius: 4px;
+    background: linear-gradient(180deg, rgba(var(--accent-color-rgb,224,105,138),.85), rgba(255,255,255,.45));
+}
+#call-window.voice-mode .call-wave span:nth-child(1){height:8px;}
+#call-window.voice-mode .call-wave span:nth-child(2){height:20px;}
+#call-window.voice-mode .call-wave span:nth-child(3){height:26px;}
+#call-window.voice-mode .call-wave span:nth-child(4){height:20px;}
+#call-window.voice-mode .call-wave span:nth-child(5){height:8px;}
+#call-window.voice-mode .call-name::after{
+    content: '语音通话中'; display:block;
+    font-size:10px; letter-spacing:2px;
+    color:rgba(255,255,255,.35); margin-top:4px;
+}
+
 #call-resize-handle{
     position:absolute;bottom:-2px;right:-2px;z-index:99901;
     width:22px;height:22px;cursor:se-resize;
@@ -384,7 +429,7 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
       <div class="call-inc-avatar" id="call-inc-avatar"><i class="fas fa-user" id="call-inc-av-icon"></i></div>
     </div>
     <div class="call-inc-name" id="call-inc-name">对方</div>
-    <div class="call-inc-sub"><span class="call-inc-sub-dot"></span><span>邀请您进行视频通话</span></div>
+    <div class="call-inc-sub"><span class="call-inc-sub-dot"></span><span id="call-inc-sub-text">邀请您进行视频通话</span></div>
     <div class="call-inc-actions">
       <button class="call-inc-btn call-inc-reject" id="call-inc-reject">
         <div class="call-inc-circle">${SVG_HU}</div>
@@ -432,7 +477,7 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
       </div>
       <div class="call-name" id="call-conn-name">对方</div>
       <div style="font-size:11px;color:rgba(255,255,255,.4);display:flex;align-items:center;gap:5px;">
-        <i class="fas fa-video" style="font-size:9px;"></i> 正在连接
+        <i class="fas fa-video" id="call-conn-icon" style="font-size:9px;"></i> <span id="call-conn-label">正在连接</span>
       </div>
       <div class="call-conn-dots"><span></span><span></span><span></span></div>
     </div>
@@ -482,18 +527,62 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
         if (document.getElementById('call-toolbar-btn')) return;
         const anchor = document.getElementById('attachment-btn');
         if (!anchor) return;
+        const wrap = document.createElement('div');
+        wrap.id = 'call-toolbar-wrap';
+        wrap.style.position = 'relative';
+        wrap.style.display = 'inline-flex';
+
         const btn = document.createElement('button');
         btn.id = 'call-toolbar-btn';
-        btn.title = '视频通话';
+        btn.title = '通话';
         btn.className = 'input-btn collapse-hideable';
         btn.style.display = S.enabled ? '' : 'none';
         btn.innerHTML = '<i class="fas fa-video"></i>';
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
             if (!S.enabled) return;
             if (S.active) { restoreWindow(); return; }
-            startCall(false);
+            var menu = document.getElementById('call-mode-menu');
+            if (!menu) { showModeMenu(wrap); }
+            else { menu.remove(); }
         });
-        anchor.parentNode.insertBefore(btn, anchor);
+
+        wrap.appendChild(btn);
+        anchor.parentNode.insertBefore(wrap, anchor);
+    }
+
+    function showModeMenu(anchor) {
+        var menu = document.createElement('div');
+        menu.id = 'call-mode-menu';
+        menu.innerHTML =
+            '<div class="call-mode-item" data-mode="video"><i class="fas fa-video"></i><span>视频通话</span></div>' +
+            '<div class="call-mode-item" data-mode="voice"><i class="fas fa-phone"></i><span>语音通话</span></div>';
+        Object.assign(menu.style, {
+            position:'absolute', bottom:'calc(100% + 6px)', left:'50%',
+            transform:'translateX(-50%)', zIndex:'99991',
+            background:'rgba(20,20,30,.92)', backdropFilter:'blur(14px)',
+            border:'1px solid rgba(255,255,255,.12)', borderRadius:'12px',
+            padding:'6px', minWidth:'120px', boxShadow:'0 10px 30px rgba(0,0,0,.45)'
+        });
+        menu.querySelectorAll('.call-mode-item').forEach(function(el) {
+            Object.assign(el.style, {
+                display:'flex', alignItems:'center', gap:'8px',
+                padding:'8px 10px', borderRadius:'8px', color:'#fff',
+                fontSize:'12px', cursor:'pointer', whiteSpace:'nowrap'
+            });
+            el.addEventListener('mouseenter', () => { el.style.background = 'rgba(255,255,255,.08)'; });
+            el.addEventListener('mouseleave', () => { el.style.background = ''; });
+            el.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var m = el.dataset.mode;
+                menu.remove();
+                var btn = document.getElementById('call-toolbar-btn');
+                if (btn) { btn.innerHTML = m === 'voice' ? '<i class="fas fa-phone"></i>' : '<i class="fas fa-video"></i>'; }
+                startCall(false, m);
+            });
+        });
+        document.addEventListener('click', function h() { menu.remove(); document.removeEventListener('click', h); }, { once:true });
+        anchor.appendChild(menu);
     }
 
     function fmt(ms) {
@@ -573,23 +662,36 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
 
     function sendCallMsg(dur) {
         if (dur < 2000) return;
-        sendCallEvent('fa-video', '视频通话已结束', fmt(dur));
+        if (S.mode === 'voice') {
+            sendCallEvent('fa-phone', '语音通话已结束', fmt(dur));
+        } else {
+            sendCallEvent('fa-video', '视频通话已结束', fmt(dur));
+        }
     }
 
-    function startCall(isPartner) {
+    function startCall(isPartner, mode) {
         if (!S.enabled) return;
+        S.mode = (mode === 'voice') ? 'voice' : 'video';
         S.active = true; S.startTime = null; S.elapsed = 0;
         S.minimized = false; S.isPartnerCall = !!isPartner; S.immersive = false;
-        document.getElementById('call-window')?.classList.remove('immersive');
+        var winEl = document.getElementById('call-window');
+        winEl?.classList.remove('immersive', 'video-mode', 'voice-mode');
+        winEl?.classList.add(S.mode + '-mode');
 
         ['call-inc-avatar','call-conn-avatar','call-win-avatar','call-mini-av'].forEach(fillAv);
         ['call-conn-name','call-win-name','call-mini-name'].forEach(fillNm);
         applyBg(); positionWindow();
 
-        const win  = document.getElementById('call-window');
-        const body = document.getElementById('call-window-body');
-        const conn = document.getElementById('call-connecting-state');
-        const timerEl = document.getElementById('call-timer-display');
+        var win  = document.getElementById('call-window');
+        var body = document.getElementById('call-window-body');
+        var conn = document.getElementById('call-connecting-state');
+        var timerEl = document.getElementById('call-timer-display');
+        var connIcon = document.getElementById('call-conn-icon');
+        if (S.mode === 'voice') {
+            if (connIcon) connIcon.className = 'fas fa-phone';
+        } else {
+            if (connIcon) connIcon.className = 'fas fa-video';
+        }
         if (win)    win.classList.add('visible');
         if (conn)   conn.classList.add('visible');
         if (body)   body.style.display = 'none';
@@ -659,11 +761,15 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
             showNotification('通话已挂断', 'info', 2000);
     }
 
-    function showIncomingCall() {
+    function showIncomingCall(forceMode) {
         if (!S.enabled || S.active) return;
+        var mode = forceMode || (Math.random() < 0.5 ? 'video' : 'voice');
+        S.mode = mode;
         const ov = document.getElementById('call-incoming-overlay');
         if (!ov) return;
         fillAv('call-inc-avatar'); fillNm('call-inc-name');
+        var txt = document.getElementById('call-inc-sub-text');
+        if (txt) txt.textContent = mode === 'voice' ? '邀请您进行语音通话' : '邀请您进行视频通话';
         ov.classList.add('visible');
         clearTimeout(S.incomingTimer);
 
@@ -835,7 +941,7 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
         });
         document.getElementById('call-inc-accept')?.addEventListener('click', () => {
             document.getElementById('call-incoming-overlay')?.classList.remove('visible');
-            clearTimeout(S.incomingTimer); startCall(true);
+            clearTimeout(S.incomingTimer); startCall(true, S.mode);
         });
 
         document.getElementById('call-hangup-btn')?.addEventListener('click', endCall);
