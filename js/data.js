@@ -151,8 +151,8 @@
         +     '<div style="padding:12px 20px">'
         +       '<div style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;line-height:1.7">'
         +         '<i class="fas fa-info-circle" style="color:var(--accent-color);margin-right:4px"></i>'
-        +         同步内容：名字/头像/主题/聊天背景/纪念日/自定义回复&字卡/开屏次数<br>'
-        +         '不同步：聊天记录（各设备独立保留）
+        +         '同步内容：名字/头像/主题/聊天背景/纪念日/自定义回复&字卡/开屏次数<br>'
+        +         '不同步：聊天记录（各设备独立保留）'
         +       '</div>'
         +
         +       '<div style="margin-bottom:12px">'
