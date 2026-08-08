@@ -263,9 +263,13 @@
                     <div class="home-app-icon home-app-decision"><i class="fas fa-balance-scale"></i></div>
                     <div class="home-app-label">抉择</div>
                 </button>
-                <button class="home-app" data-action="cinema">
-                    <div class="home-app-icon home-app-cinema"><i class="fas fa-film"></i></div>
-                    <div class="home-app-label">私人影院</div>
+                <button class="home-app" data-action="call-video">
+                    <div class="home-app-icon home-app-call-video"><i class="fas fa-video"></i></div>
+                    <div class="home-app-label">视频通话</div>
+                </button>
+                <button class="home-app" data-action="call-voice">
+                    <div class="home-app-icon home-app-call-voice"><i class="fas fa-phone"></i></div>
+                    <div class="home-app-label">语音通话</div>
                 </button>
             </div>
         </div>
@@ -396,8 +400,11 @@
                     <button class="collapsed-extra-btn" title="塔罗占卜" onclick="(function(){document.getElementById('collapsed-extras-panel').style.display='none';document.getElementById('collapse-expand-btn').classList.remove('open');generateFortune();})();">
                         <i class="fas fa-star-and-crescent"></i>
                     </button>
-                    <button class="collapsed-extra-btn" id="collapsed-call-btn" title="视频通话" onclick="(function(){document.getElementById('collapsed-extras-panel').style.display='none';document.getElementById('collapse-expand-btn').classList.remove('open');if(window.callFeature&&typeof window.callFeature.startCall==='function')window.callFeature.startCall(false);})();">
+                    <button class="collapsed-extra-btn" id="collapsed-call-btn" title="视频通话" onclick="(function(){document.getElementById('collapsed-extras-panel').style.display='none';document.getElementById('collapse-expand-btn').classList.remove('open');if(window.callFeature&&typeof window.callFeature.startCall==='function')window.callFeature.startCall(false,'video');})();">
                         <i class="fas fa-video"></i>
+                    </button>
+                    <button class="collapsed-extra-btn" title="语音通话" onclick="(function(){document.getElementById('collapsed-extras-panel').style.display='none';document.getElementById('collapse-expand-btn').classList.remove('open');if(window.callFeature&&typeof window.callFeature.startCall==='function')window.callFeature.startCall(false,'voice');})();">
+                        <i class="fas fa-phone"></i>
                     </button>
                     <button class="collapsed-extra-btn" title="退出收纳" onclick="window.exitCollapseMode && window.exitCollapseMode()" style="color:#ff5050; background:rgba(255,80,80,0.1);">
                         <i class="fas fa-times"></i>
@@ -2119,58 +2126,6 @@
         </div>
     </div>
 
-    <div class="modal" id="cinema-modal">
-        <div class="modal-content">
-            <div class="cinema-ticket">
-                <div class="cinema-ticket-header">
-                    <div class="cth-left">
-                        <div class="cth-logo"><i class="fas fa-film"></i></div>
-                        <div>
-                            <div class="cth-title">私人影院</div>
-                            <div class="cth-sub">PRIVATE CINEMA · HINE</div>
-                        </div>
-                    </div>
-                    <button class="cth-close" onclick="(function(){var m=document.getElementById('cinema-modal');if(typeof hideModal==='function')hideModal(m);else m.style.display='none';})()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="cinema-form">
-                    <div class="cinema-field">
-                        <label><i class="fas fa-video"></i> 电影名字</label>
-                        <input type="text" id="cinema-movie" placeholder="例如：你好，李焕英">
-                    </div>
-                    <div class="cinema-row2">
-                        <div class="cinema-field">
-                            <label><i class="fas fa-clock"></i> 场次</label>
-                            <input type="text" id="cinema-session" placeholder="例如：19:30">
-                        </div>
-                        <div class="cinema-field">
-                            <label><i class="fas fa-chair"></i> 座位号</label>
-                            <input type="text" id="cinema-seat" placeholder="例如：A12">
-                        </div>
-                    </div>
-                    <div class="cinema-field">
-                        <label><i class="fas fa-link"></i> 视频链接（mp4/m3u8/YouTube/B站）</label>
-                        <input type="text" id="cinema-video-url" placeholder="https://... 或 mp4 直链">
-                    </div>
-                    <div class="cinema-form-status" id="cinema-form-status"></div>
-                    <button class="cinema-create-bar" id="cinema-create-btn" type="button">
-                        <div class="ccb-left">
-                            <div class="ccb-big"><i class="fas fa-ticket-alt" style="margin-right:6px"></i>生成影票</div>
-                            <div class="ccb-small">CREATE · NEW · TICKET</div>
-                        </div>
-                        <div class="ccb-arrow"><i class="fas fa-arrow-right"></i></div>
-                    </button>
-                </div>
-                <div class="cinema-divider">
-                    <div class="cinema-divider-dot"></div>
-                </div>
-                <div class="cinema-list-title"><i class="fas fa-ticket-alt" style="margin-right:6px;color:var(--cinema-red)"></i>我的影票 · MY TICKETS</div>
-                <div id="cinema-ticket-list"></div>
-            </div>
-        </div>
-    </div>
-
     <div class="player-container" id="player">
         <div class="mini-view" id="mini-view" title="点击展开">
             <div class="vinyl-record" id="vinyl-record-visual">
@@ -2314,7 +2269,6 @@
     <script src="js/features/theme-editor.js"></script>
     <script src="js/features/group-chat.js"></script>
     <script src="js/features/call.js"></script>
-    <script src="js/features/cinema.js"></script>
 
     <!-- == 合并模块 == -->
     <script src="js/games.js"></script> 
