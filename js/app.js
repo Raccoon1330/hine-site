@@ -497,6 +497,13 @@ function initHomeScreen() {
                 case 'decision':
                     show('decision-menu-modal');
                     break;
+                case 'cinema':
+                    if (typeof window.cinemaFeature === 'function' || (window.cinemaFeature && typeof window.cinemaFeature.openCinemaModal === 'function')) {
+                        window.cinemaFeature.openCinemaModal();
+                    } else {
+                        show('cinema-modal');
+                    }
+                    break;
             }
         });
     });
