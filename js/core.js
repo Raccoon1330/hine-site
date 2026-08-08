@@ -787,19 +787,31 @@ if (customIntros && customIntros.length > 0) {
             });
         }
 
+const AUTO_SEND_MIN_MS = 5 * 60 * 1000;
+const AUTO_SEND_MAX_MS = 12 * 60 * 60 * 1000;
+
+function scheduleNextAutoSend() {
+    if (autoSendTimer) {
+        clearTimeout(autoSendTimer);
+        autoSendTimer = null;
+    }
+    if (!settings.autoSendEnabled) return;
+    const delay = AUTO_SEND_MIN_MS + Math.random() * (AUTO_SEND_MAX_MS - AUTO_SEND_MIN_MS);
+    autoSendTimer = setTimeout(() => {
+        if (!document.body.classList.contains('batch-favorite-mode')) {
+            simulateReply();
+        }
+        scheduleNextAutoSend();
+    }, Math.round(delay));
+}
+
 function manageAutoSendTimer() {
     if (autoSendTimer) {
-        clearInterval(autoSendTimer);
+        clearTimeout(autoSendTimer);
         autoSendTimer = null;
     }
     if (settings.autoSendEnabled) {
-        const intervalMs = settings.autoSendInterval * 60 * 1000;
-        
-        autoSendTimer = setInterval(() => {
-            if (!document.body.classList.contains('batch-favorite-mode')) {
-                simulateReply(); 
-            }
-        }, intervalMs);
+        scheduleNextAutoSend();
     }
 }
 
