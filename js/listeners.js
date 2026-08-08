@@ -6,7 +6,6 @@ function setupEventListeners() {
         initHeaderAndSettingsListeners();
         initDataManagementListeners();
         initNewFeatureListeners();
-        setupTutorialListeners();
         initMoodListeners();
         initDecisionModule(); 
         initAnniversaryModule(); 
