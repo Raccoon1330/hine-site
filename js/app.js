@@ -497,12 +497,11 @@ function initHomeScreen() {
                 case 'decision':
                     show('decision-menu-modal');
                     break;
-                case 'cinema':
-                    if (typeof window.cinemaFeature === 'function' || (window.cinemaFeature && typeof window.cinemaFeature.openCinemaModal === 'function')) {
-                        window.cinemaFeature.openCinemaModal();
-                    } else {
-                        show('cinema-modal');
-                    }
+                case 'call-video':
+                    if (window.callFeature?.startCall) window.callFeature.startCall(false, 'video');
+                    break;
+                case 'call-voice':
+                    if (window.callFeature?.startCall) window.callFeature.startCall(false, 'voice');
                     break;
             }
         });
