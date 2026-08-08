@@ -889,6 +889,7 @@ function prevTourStep() {
 }
 
 function setupTutorialListeners() {
+    if (!tourNextBtn || !tourPrevBtn || !tourSkipBtn) return;
     tourNextBtn.addEventListener('click', nextTourStep);
     tourPrevBtn.addEventListener('click', prevTourStep);
     tourSkipBtn.addEventListener('click', endTour);
